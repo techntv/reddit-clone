@@ -34,6 +34,8 @@ const SignUp: React.FC<SignUpProps> = () => {
     }
     createUserWithEmailAndPassword(signupForm.email, signupForm.password);
   };
+
+  console.log("userError", userError);
   return (
     <form onSubmit={onSubmit}>
       <Input
@@ -112,7 +114,7 @@ const SignUp: React.FC<SignUpProps> = () => {
         <Text color="red.500" fontSize="9pt" textAlign="center">
           {error ||
             FIREBASE_ERROR_CODES[
-              userError?.message as keyof typeof FIREBASE_ERROR_CODES
+              userError as keyof typeof FIREBASE_ERROR_CODES
             ]}
         </Text>
       )}
