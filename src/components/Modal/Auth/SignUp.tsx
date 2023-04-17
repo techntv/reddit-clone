@@ -2,7 +2,9 @@ import { authModalState } from " app/atoms/authModalAtom";
 import { Button, Flex, Input, Text } from "@chakra-ui/react";
 import React from "react";
 import { useSetRecoilState } from "recoil";
-
+import { auth } from " app/firebase/clientApp";
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { FIREBASE_ERROR_CODES } from " app/firebase/errors";
 type SignUpProps = {};
 
 const SignUp: React.FC<SignUpProps> = () => {
@@ -12,6 +14,10 @@ const SignUp: React.FC<SignUpProps> = () => {
     password: "",
     confirmPassword: "",
   });
+  const [error, setError] = React.useState("");
+
+  const [createUserWithEmailAndPassword, user, loading, userError] =
+    useCreateUserWithEmailAndPassword(auth);
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -19,7 +25,17 @@ const SignUp: React.FC<SignUpProps> = () => {
   };
 
   // Firebase sign up
-  const onSubmit = () => {};
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (error) setError("");
+    if (signupForm.password !== signupForm.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    createUserWithEmailAndPassword(signupForm.email, signupForm.password);
+  };
+
+  console.log("userError", userError);
   return (
     <form onSubmit={onSubmit}>
       <Input
@@ -94,7 +110,23 @@ const SignUp: React.FC<SignUpProps> = () => {
         }}
         bg="gray.50"
       />
-      <Button type="submit" width="100%" height="38px" mt={2} mb={2}>
+      {(error || userError) && (
+        <Text color="red.500" fontSize="9pt" textAlign="center">
+          {error ||
+            FIREBASE_ERROR_CODES[
+              userError as keyof typeof FIREBASE_ERROR_CODES
+            ]}
+        </Text>
+      )}
+
+      <Button
+        type="submit"
+        width="100%"
+        height="38px"
+        mt={2}
+        mb={2}
+        isLoading={loading}
+      >
         Sign Up
       </Button>
       <Flex fontSize="9pt" justifyContent="center">
